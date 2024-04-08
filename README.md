@@ -13,7 +13,7 @@ Prerequisites:
 
 
 ### Installation
-Get started with the project using the instructions below:
+Get started by doing the below:
 
 1. Create a ```.env``` file and add the follow to it
     * DEFAULT_DATABASE
