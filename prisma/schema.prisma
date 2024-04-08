@@ -17,7 +17,7 @@ model User {
     username   String
     email      String   @unique
     password   String
-    is_admin Boolean
+    is_admin   Boolean
     // conversations        Conversation[]
     // database_connections DatabaseConnection[]
     created_at DateTime @default(now())

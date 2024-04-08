@@ -5,8 +5,11 @@
 
 
 from fastapi import APIRouter, responses, status
+from fastapi.encoders import jsonable_encoder
 from app.utils.user import UserDB
-from schema.user import CreateUser, User
+from app.utils.utils import create_access_token, verify_password
+from schema.user import CreateUser, User, UserLogin
+from datetime import timedelta
 
 
 auth_router = APIRouter(
@@ -52,27 +55,35 @@ async def signup(user: CreateUser):
         status_code=status.HTTP_200_OK)
 
 
-# @auth_router.post("/login", summary="User login",
-#                   response_model_exclude_none=True)
-# async def login(user: UserLogin):
-#     """"""
-#     existing_user = await UserDB().user_exists(user.email)
+@auth_router.post("/login", summary="User login",
+                  response_model_exclude_none=True)
+async def login(user: UserLogin):
+    """"""
+    existing_user = await UserDB().user_exists(user.email)
 
-#     if not existing_user:
-#         return responses.JSONResponse(
-#             content={"detail": "Invalid login!"},
-#             status_code=status.HTTP_401_UNAUTHORIZED
-#         )
+    if not existing_user:
+        return responses.JSONResponse(
+            content={"detail": "Invalid login!"},
+            status_code=status.HTTP_401_UNAUTHORIZED
+        )
 
-#     user_password = jsonable_encoder(existing_user).get('password')
-#     print(user_password)
-#     if not verify_password(user.password, user_password):
-#         return responses.JSONResponse(
-#             content={"detail": "Invalid login!"},
-#             status_code=status.HTTP_401_UNAUTHORIZED
-#         )
+    user_password = jsonable_encoder(existing_user).get('password')
 
-#     return responses.JSONResponse(
-#         content={"detail": "Ok!"},
-#         status_code=status.HTTP_200_OK
-#     )
+    if not verify_password(user.password, user_password):
+        return responses.JSONResponse(
+            content={"detail": "Invalid login!"},
+            status_code=status.HTTP_401_UNAUTHORIZED
+        )
+
+    access_token_expires = timedelta(minutes=60*2)
+
+    token = create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires)
+
+    user = User(**existing_user).to_json()
+
+    return responses.JSONResponse(
+        content={"user": user,
+                 "access_token": token},
+        status_code=status.HTTP_200_OK
+    )

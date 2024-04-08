@@ -28,7 +28,8 @@ class UserDB(Database):
         Returns:
             User - The user
         """
-        return await self.db.user.find_unique(where={"email": email})
+        return jsonable_encoder(await self.db.user
+                                .find_unique(where={"email": email}))
 
     async def create_user(self, user: CreateUser):
         """
