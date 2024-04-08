@@ -8,3 +8,6 @@ etenv/
 etenv
 
 __pycache__
+
+.vscode
+.vscode/
