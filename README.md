@@ -15,7 +15,7 @@ Prerequisites:
 ### Installation
 Get start with the project using the instructions below:
 
-    - Create a ```.env``` file and add the follow to it
-        * DEFAULT_DATABASE
-    - Run ```pip install -r requirements.txt``` to install project dependencies
-    - After that, run the app using ```python3 -m app.main``` (assuming your cwd is not ```app```)
+1. Create a ```.env``` file and add the follow to it
+    * DEFAULT_DATABASE
+2. Run ```pip install -r requirements.txt``` to install project dependencies
+3. After that, run the app using ```python3 -m app.main``` (assuming your cwd is not ```app```)
