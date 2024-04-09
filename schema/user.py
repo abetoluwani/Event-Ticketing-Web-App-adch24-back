@@ -4,7 +4,6 @@
 """User validation schema"""
 
 
-from enum import Enum
 from typing import Union
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, EmailStr, Field
@@ -19,6 +18,8 @@ class User(BaseModel):
                                          description="User's first name")
     last_name: Union[str, None] = Field(default=None, title="Last Name",
                                         description="User's last name")
+    username: Union[str, None] = Field(default=None, title="User Name",
+                                       description="User's username")
     is_admin: bool = False
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime = Field(default=datetime.now())
@@ -30,6 +31,7 @@ class User(BaseModel):
 
 
 class CreateUser(BaseModel):
+    """Create user schema"""
     first_name: Union[str, None] = Field(default=None, title="First Name",
                                          description="User's first name")
     last_name: Union[str, None] = Field(default=None, title="Last Name",
@@ -43,6 +45,21 @@ class CreateUser(BaseModel):
         """Convert to json"""
         user_dict = jsonable_encoder(self)
         del user_dict["cpassword"]
+        return user_dict
+
+
+class UpdateUser(BaseModel):
+    """Update User schema"""
+    first_name: Union[str, None] = Field(default=None, title="First Name",
+                                         description="User's first name")
+    last_name: Union[str, None] = Field(default=None, title="Last Name",
+                                        description="User's last name")
+    password: Union[str, None] = Field(min_length=6, default=None)
+    old_password: Union[str, None] = Field(min_length=6, default=None)
+
+    def to_json(self):
+        """Convert to json"""
+        user_dict = jsonable_encoder(self)
         return user_dict
 
 

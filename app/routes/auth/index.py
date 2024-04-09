@@ -13,7 +13,8 @@ from datetime import timedelta
 
 
 auth_router = APIRouter(
-    responses={404: {'description': "Not found!"}}, tags=["Authentication"]
+    responses={404: {'description': "Not found!"}}, tags=["Authentication"],
+    prefix="/auth"
 )
 
 
@@ -35,12 +36,12 @@ async def signup(user: CreateUser):
 
     if not existing_user:
         try:
-            new_user = await UserDB().create_user({**user.to_json()})
+            new_user = await UserDB().create_user(user)
 
             return responses.JSONResponse(
                 content={
                     "message": "Account created successfully!",
-                    "user": User(**new_user).to_json()
+                    "user": jsonable_encoder(new_user)
                 },
                 status_code=status.HTTP_201_CREATED)
         except:
@@ -56,10 +57,10 @@ async def signup(user: CreateUser):
 
 
 @auth_router.post("/login", summary="User login",
-                  response_model_exclude_none=True)
+                  response_model_exclude_none=True, response_model=User)
 async def login(user: UserLogin):
     """"""
-    existing_user = await UserDB().user_exists(user.email)
+    existing_user = jsonable_encoder(await UserDB().user_exists(user.email))
 
     if not existing_user:
         return responses.JSONResponse(
@@ -67,7 +68,9 @@ async def login(user: UserLogin):
             status_code=status.HTTP_401_UNAUTHORIZED
         )
 
-    user_password = jsonable_encoder(existing_user).get('password')
+    print(existing_user)
+    user_password = existing_user['password']
+
 
     if not verify_password(user.password, user_password):
         return responses.JSONResponse(
@@ -80,10 +83,8 @@ async def login(user: UserLogin):
     token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires)
 
-    user = User(**existing_user).to_json()
-
     return responses.JSONResponse(
-        content={"user": user,
+        content={"user": existing_user,
                  "access_token": token},
         status_code=status.HTTP_200_OK
     )

@@ -5,13 +5,12 @@
 
 
 from typing import Any, Dict, Union
+from fastapi.encoders import jsonable_encoder
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timezone, timedelta
 from os import getenv
 from fastapi import Depends, HTTPException, Request, status
-
-# from app.utils.userdb import UserDB
 from schema.user import User
 
 
@@ -49,6 +48,11 @@ def verify_password(password: str, hashed_pass: str) -> bool:
 def create_access_token(data: dict, expires_delta:
                         Union[timedelta, None] = None) -> str:
     """"""
+    SECRET_KEY = getenv("JWT_SECRET_KEY")
+
+    if SECRET_KEY is None:
+        raise Exception("🚨 JWT SECRET KEY NOT SET")
+
     to_encode = data.copy()
 
     if expires_delta:
@@ -60,13 +64,8 @@ def create_access_token(data: dict, expires_delta:
 
     encoded_jwt = None
 
-    SECRET_KEY = getenv("JWT_SECRET_KEY")
-
-    if SECRET_KEY is None:
-        raise Exception("🚨 JWT SECRET KEY NOT SET")
-    else:
-        encoded_jwt = jwt.encode(
-            to_encode, key=SECRET_KEY, algorithm=getenv("JWT_ALGORITHM") or "HS256")
+    encoded_jwt = jwt.encode(
+        to_encode, key=SECRET_KEY, algorithm=getenv("JWT_ALGORITHM") or "HS256")
 
     return encoded_jwt
 
@@ -74,6 +73,9 @@ def create_access_token(data: dict, expires_delta:
 def verify_access_token(request: Request) -> Union[dict, None]:
     """"""
     SECRET_KEY = getenv("JWT_SECRET_KEY")
+
+    if SECRET_KEY is None:
+        raise Exception("🚨 JWT SECRET KEY NOT SET")
 
     token: str
 
@@ -89,9 +91,6 @@ def verify_access_token(request: Request) -> Union[dict, None]:
 
     token = authorization[1]
 
-    if SECRET_KEY is None:
-        raise Exception("🚨 JWT SECRET KEY NOT SET")
-
     try:
         payload = jwt.decode(token, key=SECRET_KEY,
                              algorithms=getenv("JWT_ALGORITHM") or "HS256")
@@ -102,14 +101,15 @@ def verify_access_token(request: Request) -> Union[dict, None]:
     return None
 
 
-async def custom_auth(payload: Dict[str, Any] = Depends(verify_access_token)) -> User:
+async def custom_auth(payload: Dict[str, Any] =
+                      Depends(verify_access_token)) -> User:
     """"""
     if not payload:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Unauthorized!",
                             headers={"Authorization": "Bearer"})
 
-    from app.utils.userdb import UserDB
+    from app.utils.user import UserDB  # importing here to avoid circular import
 
     user = await UserDB().user_exists(email=payload["sub"])
 
@@ -118,4 +118,4 @@ async def custom_auth(payload: Dict[str, Any] = Depends(verify_access_token)) ->
                             detail="Unauthorized!",
                             headers={"Authorization": "Bearer"})
 
-    return User(**user).to_json()
+    return User(**jsonable_encoder(user))
