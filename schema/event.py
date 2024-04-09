@@ -30,3 +30,7 @@ class Event(BaseModel):
     user: 'User'
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime = Field(default=datetime.now())
+
+
+class CreateEventInput(BaseModel):
+    """Create event schema"""

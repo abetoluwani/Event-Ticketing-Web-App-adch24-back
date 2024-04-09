@@ -6,7 +6,7 @@
 
 from fastapi import APIRouter, responses, status
 from fastapi.encoders import jsonable_encoder
-from app.utils.user import UserDB
+from app.helpers.user import UserDB
 from app.utils.utils import create_access_token, verify_password
 from schema.user import CreateUser, User, UserLogin
 from datetime import timedelta
