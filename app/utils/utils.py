@@ -109,7 +109,7 @@ async def custom_auth(payload: Dict[str, Any] =
                             detail="Unauthorized!",
                             headers={"Authorization": "Bearer"})
 
-    from app.utils.user import UserDB  # importing here to avoid circular import
+    from app.helpers.user import UserDB  # importing here to avoid circular import
 
     user = await UserDB().user_exists(email=payload["sub"])
 
