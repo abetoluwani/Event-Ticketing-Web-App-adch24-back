@@ -24,6 +24,23 @@ model User {
     updated_at DateTime @default(now())
 }
 
+model Event {
+    id        String        @id @unique
+    name      String
+    date_time DateTime      @default(now())
+    location  String
+    thumbnail String
+    images    EventImages[]
+}
+
+model EventImages {
+    id       String @id @unique
+    event    Event  @relation(fields: [event_id], references: [id])
+    uri      String
+    name     String
+    event_id String
+}
+
 // model Conversation {
 //     id         String   @id @unique
 //     prompts    Prompt[]
