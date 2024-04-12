@@ -18,8 +18,6 @@ class User(BaseModel):
                                          description="User's first name")
     last_name: Union[str, None] = Field(default=None, title="Last Name",
                                         description="User's last name")
-    username: Union[str, None] = Field(default=None, title="User Name",
-                                       description="User's username")
     is_admin: bool = False
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime = Field(default=datetime.now())
@@ -37,7 +35,8 @@ class CreateUser(BaseModel):
     last_name: Union[str, None] = Field(default=None, title="Last Name",
                                         description="User's last name")
     email: EmailStr
-    username: str
+    username: Union[str, None] = Field(
+        default=None, description="User's username")
     password: str = Field(min_length=6)
     cpassword: str
 
@@ -47,6 +46,17 @@ class CreateUser(BaseModel):
         del user_dict["cpassword"]
         return user_dict
 
+
+class CreateUserGoogle(BaseModel):
+    """Create User from Google Authentication"""
+    first_name: Union[str, None] = Field(default=None, title="First Name",
+                                         description="User's first name")
+    last_name: Union[str, None] = Field(default=None, title="Last Name",
+                                        description="User's last name")
+    email: EmailStr
+
+    class Config:
+        from_attributes = True
 
 class UpdateUser(BaseModel):
     """Update User schema"""

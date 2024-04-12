@@ -3,14 +3,16 @@
 # Author: Oluwatobiloba Light
 """Event Ticketing entry point"""
 
+from app import api
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-import uvicorn
 from app.db import Database
 from fastapi.middleware.cors import CORSMiddleware
 from prisma import errors
+from os import getenv
+from starlette.middleware.sessions import SessionMiddleware
 
 
 @asynccontextmanager
@@ -45,30 +47,23 @@ def init_app():
     init.add_middleware(CORSMiddleware,
                         allow_origins=origins,
                         allow_credentials=True,
-                        allow_methods=["GET", "POST", "PUT", "DELETE",
-                                       "OPTION"],
-                        allow_headers=["Content-Type", "Authorization",
-                                       "WWW-AUTHENTICATE"])
+                        allow_methods=["*"],
+                        allow_headers=["*"]
+                        # allow_methods=["GET", "POST", "PUT", "DELETE",
+                        #                "OPTION"],
+                        # allow_headers=["Content-Type", "Authorization",
+                        #                "WWW-AUTHENTICATE"]
+                        )
 
-    # db = Database()
+    SECRET_KEY = getenv('SECRET_KEY') or None
 
-    # @init.on_event("startup")
-    # async def startup():
-    #     try:
-    #         await db.connect()
-    #         print("✅ Database Connected!")
-    #     except errors.PrismaError as e:
-    #         print("error: ", e)
-    #         print("❌ DB Connection failed")
-    #         raise Exception("🚨 Database connection failed! 🚨")
+    if SECRET_KEY is None:
+        raise RuntimeError('Missing SECRET_KEY')
 
-    # @init.on_event("shutdown")
-    # async def shutdown():
-    #     await db.disconnect()
-
-    from app import api
+    init.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
     init.include_router(api)
+
     return init
 
 
@@ -88,8 +83,3 @@ async def validation_exception_handler(_, exc):
         })
     return JSONResponse(status_code=422, content={
         "detail": "Validation error", "errors": errors})
-
-
-if __name__ == "__main__":
-    uvicorn.run('app.main:app',
-                host="0.0.0.0", port=8000, reload=True)

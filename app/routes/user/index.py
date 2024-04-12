@@ -5,7 +5,7 @@
 
 
 from fastapi.encoders import jsonable_encoder
-from app.utils.user import UserDB
+from app.helpers.user import UserDB
 from fastapi import APIRouter, Depends, responses, status
 from app.utils.utils import custom_auth
 from schema.user import UpdateUser, User

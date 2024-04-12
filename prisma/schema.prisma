@@ -14,9 +14,8 @@ model User {
     id         String   @id @unique
     first_name String?
     last_name  String?
-    username   String
     email      String   @unique
-    password   String
+    password   String?
     is_admin   Boolean
     events Event[]
     created_at DateTime @default(now())
