@@ -6,7 +6,8 @@
 
 from typing import List, Any
 from app.db import Database
-from schema.event import Event
+from schema.event import CreateEventInput, Event
+from prisma.errors import PrismaError
 
 
 class EventDb(Database):
@@ -22,3 +23,15 @@ class EventDb(Database):
 
         print(events_json)
         return events_json
+
+    async def create_event(self, user_id: str, form_data: CreateEventInput):
+        """"""
+        try:
+            await self.db.event.create(
+                data={
+                    **form_data.to_json()
+                }
+            )
+
+        except (PrismaError, ) as e:
+            pass

@@ -5,6 +5,7 @@
 
 
 from typing import List
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field
 from datetime import datetime
 from schema.user import User
@@ -34,3 +35,17 @@ class Event(BaseModel):
 
 class CreateEventInput(BaseModel):
     """Create event schema"""
+    name: str
+    date_time: datetime
+    location: str
+    thumbnail: str
+    images: List['EventImage'] = []
+    user_id: str
+
+    def to_json(self):
+        """Convert to json"""
+        user_dict = jsonable_encoder(self)
+        return user_dict
+
+    class Config:
+        orm_mode = True

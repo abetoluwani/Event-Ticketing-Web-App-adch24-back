@@ -11,3 +11,6 @@ __pycache__
 
 .vscode
 .vscode/
+
+
+client_secret.json
