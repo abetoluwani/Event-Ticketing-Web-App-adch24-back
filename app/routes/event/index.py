@@ -37,7 +37,6 @@ async def events(user: User = Depends(custom_auth)):
 async def create_event():
     """"""
 
-
     return responses.JSONResponse(
         content={"event": {}},
         status_code=status.HTTP_200_OK
