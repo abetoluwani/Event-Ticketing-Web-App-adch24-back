@@ -6,7 +6,6 @@
 
 from fastapi import APIRouter, Request, responses, status
 from fastapi.encoders import jsonable_encoder
-import google.auth.transport.requests
 import google.oauth2.id_token
 from app.helpers.user import UserDB
 from app.utils.auth import create_access_token, get_google_auth_state, \
@@ -81,7 +80,7 @@ async def login(user: UserLogin):
             status_code=status.HTTP_401_UNAUTHORIZED
         )
 
-    access_token_expires = timedelta(minutes=60*2)
+    access_token_expires = timedelta(minutes=60)
 
     token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires)
@@ -106,7 +105,7 @@ async def google_login(request: Request):
 @auth_router.get("/", summary="Google Authentication Callback",
                  response_model_exclude_none=True,
                  response_model=User)
-async def google_auth(request: Request):
+async def google_auth_callback(request: Request):
     """"""
     flow = google_auth_flow(str(request.query_params.get('code')))
 
@@ -161,7 +160,8 @@ async def google_auth(request: Request):
     if user is None:
         return responses.JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            content={"detail": "An error occured while creating a new account!"})
+            content={"detail":
+                     "An error occured while creating a new account!"})
 
     token = create_access_token(
         data={"sub": user.email},
