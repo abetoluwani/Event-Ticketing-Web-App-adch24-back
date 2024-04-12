@@ -7,7 +7,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, responses, status
 from app.helpers.event import EventDb
-from app.utils.utils import custom_auth
+from app.utils.auth import custom_auth
 from schema.event import Event
 from schema.user import User
 
