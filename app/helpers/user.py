@@ -9,7 +9,7 @@ from typing import Union
 from fastapi.encoders import jsonable_encoder
 from app.db import Database
 from prisma.models import User
-from app.utils.auth import hash_password, verify_password
+from app.auth import hash_password, verify_password
 from schema.user import CreateUser, CreateUserGoogle, UpdateUser, User as UserSchema
 from uuid import uuid4
 from prisma.errors import PrismaError

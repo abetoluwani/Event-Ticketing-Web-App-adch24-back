@@ -34,15 +34,15 @@ if GOOGLE_CLIENT_ID is None or GOOGLE_CLIENT_SECRET is None:
     raise BaseException('Missing env variables')
 
 
-# client_secret = os.path.join("./", "client_secret.json")
+client_secret = os.path.join("./", "client_secret.json")
 
-client_secret = {"web": {"client_id": GOOGLE_CLIENT_ID, "project_id": "event-ticketing-419913", "auth_uri": "https://accounts.google.com/o/oauth2/auth", "token_uri": "https://oauth2.googleapis.com/token",
-                         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs", "client_secret": GOOGLE_CLIENT_SECRET, "redirect_uris": ["http://127.0.0.1:8000/auth"], "javascript_origins": ["http://127.0.0.1:8000"]}
-                 }
+# client_secret = {"web": {"client_id": GOOGLE_CLIENT_ID, "project_id": "event-ticketing-419913", "auth_uri": "https://accounts.google.com/o/oauth2/auth", "token_uri": "https://oauth2.googleapis.com/token",
+#                          "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs", "client_secret": GOOGLE_CLIENT_SECRET, "redirect_uris": ["http://127.0.0.1:8000/auth"], "javascript_origins": ["http://127.0.0.1:8000"]}
+#                  }
 
 flow = Flow.from_client_secrets_file(
-    client_secrets_file=jsonable_encoder(client_secret),
-    redirect_uri="http://127.0.0.1:8000/auth",
+    client_secrets_file=client_secret,
+    redirect_uri="http://127.0.0.1:8000/auth/login",
     scopes=['https://www.googleapis.com/auth/userinfo.profile',
             'https://www.googleapis.com/auth/userinfo.email', 'openid'])
 
@@ -157,8 +157,26 @@ async def custom_auth(payload: Dict[str, Any] =
     return User(**jsonable_encoder(user))
 
 
-def get_google_auth_state() -> Tuple[str, str]:
+def get_google_auth_state(type: str) -> Tuple[str, str]:
     """"""
+    if type == 'login':
+        authorization_url, state = flow.authorization_url(
+            # Recommended, enable offline access so that you can refresh an access token without
+            # re-prompting the user for permission. Recommended for web server apps.
+            access_type='offline',
+            # # Optional, enable incremental authorization. Recommended as a best practice.
+            include_granted_scopes='true',
+            # # Recommended, state value can increase your assurance that an incoming connection is the result
+            # # of an authentication request.
+            # # state=state,
+            # # Optional, if your application knows which user is trying to authenticate, it can use this
+            # # parameter to provide a hint to the Google Authentication Server.
+            # login_hint='hint@example.com',
+            # # Optional, set prompt to 'consent' will prompt the user for consent
+            # prompt='consent'
+        )
+        return (authorization_url, state)
+
     authorization_url, state = flow.authorization_url(
         # Recommended, enable offline access so that you can refresh an access token without
         # re-prompting the user for permission. Recommended for web server apps.
@@ -174,8 +192,8 @@ def get_google_auth_state() -> Tuple[str, str]:
         # # Optional, set prompt to 'consent' will prompt the user for consent
         # prompt='consent'
     )
-
     return (authorization_url, state)
+
 
 
 def google_auth_flow(code: str):
@@ -200,5 +218,4 @@ def verify_google_token(id_token: Any) -> Union[Mapping[str, Any], None]:
         return user_info
     except (google.auth.exceptions.InvalidValue,
             google.auth.exceptions.InvalidOperation) as e:
-        """"""
         return None
