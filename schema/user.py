@@ -18,6 +18,10 @@ class User(BaseModel):
                                          description="User's first name")
     last_name: Union[str, None] = Field(default=None, title="Last Name",
                                         description="User's last name")
+
+    phone_no: Union[int, None] = Field(default=None, title="Phone Number",
+                                       description="User's phone number")
+
     is_admin: bool = False
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime = Field(default=datetime.now())
@@ -32,12 +36,16 @@ class CreateUser(BaseModel):
     """Create user schema"""
     first_name: Union[str, None] = Field(default=None, title="First Name",
                                          description="User's first name")
+
     last_name: Union[str, None] = Field(default=None, title="Last Name",
                                         description="User's last name")
     email: EmailStr
-    username: Union[str, None] = Field(
-        default=None, description="User's username")
+
+    phone_no: Union[int, None] = Field(default=None, title="Phone Number",
+                                       description="User's phone number")
+
     password: str = Field(min_length=6)
+
     cpassword: str
 
     def to_json(self):
@@ -62,9 +70,15 @@ class UpdateUser(BaseModel):
     """Update User schema"""
     first_name: Union[str, None] = Field(default=None, title="First Name",
                                          description="User's first name")
+
     last_name: Union[str, None] = Field(default=None, title="Last Name",
                                         description="User's last name")
+
+    phone_no: Union[int, None] = Field(default=None, title="Phone Number",
+                                       description="User's phone number")
+
     password: Union[str, None] = Field(min_length=6, default=None)
+
     old_password: Union[str, None] = Field(min_length=6, default=None)
 
     def to_json(self):
