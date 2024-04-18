@@ -95,7 +95,7 @@ class BaseRepository:
 
                 session.refresh(query)
             except IntegrityError as e:
-                raise DuplicatedError(detail="User exists!")
+                raise DuplicatedError(detail="This entry already exists!")
 
             return query
 

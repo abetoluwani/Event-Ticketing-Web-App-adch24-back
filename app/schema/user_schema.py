@@ -14,9 +14,12 @@ from app.util.schema import AllOptional
 
 class BaseUser(BaseModel):
     email: str
+    # password: Optional[str]
     user_token: Optional[str]
+
     first_name: Optional[str]
     last_name: Optional[str]
+
     is_active: bool
     is_admin: bool
 
@@ -29,6 +32,7 @@ class BaseUserWithPassword(BaseUser):
 
 
 class User(ModelBaseInfo, BaseUser, AllOptional):
+    password: Union[str, None] = Field(default=None)
     ...
 
 
@@ -38,7 +42,14 @@ class FindUser(BaseModel):
     ...
 
 
-class UpsertUser(BaseUser, AllOptional):
+class UpsertUser(BaseModel):
+    email: Optional[str] = Field(default=None)
+    password: Optional[str] = Field(default=None)
+
+    first_name: Optional[str] = Field(default=None)
+    last_name: Optional[str] = Field(default=None)
+
+    phone_no: Optional[str] = Field(default=None)
     ...
 
 

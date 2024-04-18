@@ -8,6 +8,7 @@ from sqlmodel import SQLModel
 
 from app.core.config import configs
 from app.model.user import User
+from app.model.event import Event
 
 cmd_kwargs = context.get_x_argument(as_dictionary=True)
 if "ENV" in cmd_kwargs:

@@ -33,6 +33,7 @@ async def sign_in(user_info: SignIn, service: AuthService =
 @inject
 async def sign_up(user_info: SignUp, service: AuthService =
                   Depends(Provide[Container.auth_service])):
+
     return service.sign_up(user_info)
 
 

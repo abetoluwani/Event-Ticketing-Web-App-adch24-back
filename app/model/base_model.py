@@ -5,13 +5,14 @@
 
 
 from datetime import datetime
+from uuid import UUID, uuid4
 from sqlmodel import Column, DateTime, Field, SQLModel, func
 
 
 class BaseModel(SQLModel):
-    id: int = Field(primary_key=True)
-    created_at: datetime = Field(sa_column=Column(
+    id: UUID = Field(primary_key=True, default=uuid4())
+    created_at: datetime = Field(Column(
         DateTime(timezone=True), default=func.now()))
 
-    updated_at: datetime = Field(sa_column=Column(
+    updated_at: datetime = Field(Column(
         DateTime(timezone=True), default=func.now(), onupdate=func.now()))

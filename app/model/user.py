@@ -4,13 +4,13 @@
 """User Model"""
 
 
-from typing import Optional
-from sqlmodel import Field
+from typing import List, Optional
+from sqlmodel import Field, Relationship
 from app.model.base_model import BaseModel
 
 
 class User(BaseModel, table=True):
-    # __tablename__: str = 'users'
+    __tablename__: str = 'users'
 
     first_name: str = Field(default=None, nullable=True)
     last_name: str = Field(default=None, nullable=True)
@@ -22,3 +22,5 @@ class User(BaseModel, table=True):
     phone_no: str = Field(default=None, nullable=True)
     is_active: bool = Field(default=True)
     is_admin: bool = Field(default=False)
+
+    events: Optional[List["Event"]] = Relationship(back_populates="user")
