@@ -6,6 +6,7 @@
 
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 from pydantic import BaseModel, Field
 from app.schema.user_schema import User
 
@@ -32,7 +33,7 @@ class GoogleSignIn(BaseModel):
 
 
 class Payload(BaseModel):
-    id: int
+    id: str
     email: str
     name: str
     is_admin: bool

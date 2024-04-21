@@ -6,9 +6,10 @@
 
 from typing import List, Optional, Union
 
+from fastapi import Request
 from pydantic import BaseModel, Field
 
-from app.schema.base_schema import FindBase, ModelBaseInfo, SearchOptions
+from app.schema.base_schema import FindBase, FindQueryOptions, ModelBaseInfo, SearchOptions
 from app.util.schema import AllOptional
 
 
@@ -23,6 +24,8 @@ class BaseUser(BaseModel):
     is_active: bool
     is_admin: bool
 
+    phone_no: Optional[str]
+
     class Config:
         orm_mode = True
 
@@ -36,9 +39,24 @@ class User(ModelBaseInfo, BaseUser, AllOptional):
     ...
 
 
+class User_(ModelBaseInfo, BaseUser, AllOptional):
+    ...
+
+
 class FindUser(BaseModel):
-    # email__eq: Optional[str] = Field(default=None)
     email: str
+    ...
+
+
+class FindUserQuery(BaseModel):
+    request: Request
+    ...
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class FindUserQueryOptions(FindQueryOptions):
     ...
 
 
@@ -54,5 +72,5 @@ class UpsertUser(BaseModel):
 
 
 class FindUserResult(BaseModel):
-    founds: Optional[List[User]]
+    founds: Optional[List[User_]]
     search_options: Optional[SearchOptions]

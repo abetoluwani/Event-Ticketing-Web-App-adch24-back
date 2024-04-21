@@ -4,6 +4,7 @@
 """User Services"""
 
 
+from app.model.user import User
 from app.repository.user_repository import UserRepository
 from app.services.base_service import BaseService
 

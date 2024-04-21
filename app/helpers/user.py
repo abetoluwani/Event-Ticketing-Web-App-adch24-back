@@ -54,7 +54,6 @@ class UserDB(Database):
                 data={
                     "id": str(uuid4()),
                     "email": user.email,
-                    "username": user.username,
                     "password": user.password,
                     "first_name": user.first_name,
                     "last_name": user.last_name,

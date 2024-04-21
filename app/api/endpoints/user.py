@@ -4,35 +4,55 @@
 """User endpoint"""
 
 
+from uuid import UUID
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends
+from fastapi.encoders import jsonable_encoder
 
 from app.core.container import Container
-from app.core.dependencies import get_current_super_user, get_current_user
+from app.core.dependencies import get_current_user
 from app.core.exceptions import ValidationError
 from app.core.security import JWTBearer, get_password_hash
 from app.schema.base_schema import Blank
-from app.schema.user_schema import FindUser, FindUserResult, UpsertUser, User
+from app.schema.event_schema import FindEventQuery, GetUserEventsQuery
+from app.schema.user_schema import FindUserQuery, \
+    FindUserQueryOptions, FindUserResult, UpsertUser, User
+from app.services.event_service import EventService
 from app.services.user_service import UserService
 
 router = APIRouter(
     prefix="/user", tags=["user"], dependencies=[Depends(JWTBearer())])
 
 
-@router.get("", response_model=FindUserResult)
+@router.get("/all", response_model=FindUserResult)
 @inject
 async def get_user_list(
-    find_query: FindUser = Depends(),
+    find_query: FindUserQuery = Depends(),
     service: UserService = Depends(Provide[Container.user_service]),
-    current_user: User = Depends(get_current_super_user),
+    # current_user: User = Depends(get_current_super_user),
 ):
-    return service.get_list(find_query)
+    return service.get_list(FindUserQueryOptions(
+        **jsonable_encoder(find_query.request.query_params)
+    ))
+
+
+@router.get("/events")
+@inject
+async def get_user_events(
+    find_query: FindEventQuery = Depends(),
+    event_service: EventService = Depends(Provide[Container.event_service]),
+    current_user: User = Depends(get_current_user),
+):
+    events = event_service.get_events_by_user(find_query, current_user.id)
+
+    return events
+
 
 
 @router.get("/{user_id}", response_model=User)
 @inject
 async def get_user(
-    user_id: int,
+    user_id: str,
     service: UserService = Depends(Provide[Container.user_service]),
     current_user: User = Depends(get_current_user),
 ):
@@ -56,7 +76,7 @@ async def get_user(
 @router.patch("/{user_id}", response_model=User)
 @inject
 async def update_user(
-    user_id: int,
+    user_id: UUID,
     user: UpsertUser,
     service: UserService = Depends(Provide[Container.user_service]),
     current_user: User = Depends(get_current_user),
@@ -77,7 +97,7 @@ async def update_user(
 @router.delete("/{user_id}", response_model=Blank)
 @inject
 async def delete_user(
-    user_id: int,
+    user_id: str,
     service: UserService = Depends(Provide[Container.user_service]),
     current_user: User = Depends(get_current_user),
 ):

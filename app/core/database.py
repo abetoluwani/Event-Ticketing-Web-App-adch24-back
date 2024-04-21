@@ -4,8 +4,11 @@
 """Database"""
 
 from contextlib import contextmanager
-from typing import Generator
+import os
+from pathlib import Path
+from typing import Any, AsyncGenerator, Generator, Optional, Union
 
+from prisma import Prisma
 from sqlalchemy import create_engine, orm
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
@@ -26,8 +29,11 @@ Base = declarative_base()
 
 
 class Database:
+    # _client: Optional[Prisma] = None
+
     def __init__(self, db_url: str) -> None:
         self._engine = create_engine(db_url, echo=False)
+
         self._session_factory = orm.scoped_session(
             orm.sessionmaker(
                 autocommit=False,

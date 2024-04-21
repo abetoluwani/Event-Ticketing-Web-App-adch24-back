@@ -6,13 +6,14 @@
 
 from datetime import datetime
 from uuid import UUID, uuid4
-from sqlmodel import Column, DateTime, Field, SQLModel, func
+from sqlmodel import DateTime, Field, SQLModel, func
+
+from app.core.database import Base
 
 
-class BaseModel(SQLModel):
+class BaseModel(SQLModel  ):
     id: UUID = Field(primary_key=True, default=uuid4())
-    created_at: datetime = Field(Column(
-        DateTime(timezone=True), default=func.now()))
 
-    updated_at: datetime = Field(Column(
-        DateTime(timezone=True), default=func.now(), onupdate=func.now()))
+    created_at: datetime = Field(default=func.now())
+
+    updated_at: datetime = Field(default=func.now())

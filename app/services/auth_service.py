@@ -7,6 +7,8 @@
 from datetime import timedelta
 from typing import Any, List, Mapping, Optional
 
+from fastapi.encoders import jsonable_encoder
+
 from app.core.config import configs
 from app.core.exceptions import AuthError, ValidationError
 from app.core.security import create_access_token, get_password_hash, \
@@ -32,7 +34,7 @@ class AuthService(BaseService):
         user: List[User] = self.user_repository.read_by_options(find_user)[
             "founds"]
 
-        if len(user) < 1:
+        if not user or len(user) < 1:
             raise AuthError(detail="Incorrect email or password")
 
         found_user = user[0]
@@ -47,13 +49,14 @@ class AuthService(BaseService):
         delattr(found_user, "password")
 
         payload = Payload(
-            id=found_user.id,
+            id=str(found_user.id),
             email=found_user.email,
-            name=found_user.first_name + found_user.last_name,
+            name=found_user.first_name + " " + found_user.last_name,
             is_admin=found_user.is_admin,
         )
 
-        token_lifespan = timedelta(minutes=configs.ACCESS_TOKEN_EXPIRE_MINUTES)
+        token_lifespan = timedelta(
+            minutes=configs.ACCESS_TOKEN_EXPIRE_MINUTES)
 
         access_token, expiration_datetime = create_access_token(
             payload.model_dump(), token_lifespan)

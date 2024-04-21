@@ -6,11 +6,12 @@
 
 from datetime import datetime
 from typing import List, Optional, Union
-from pydantic import BaseModel
+from uuid import UUID
+from pydantic import BaseModel, Field
 
 
 class ModelBaseInfo(BaseModel):
-    id: int
+    id: UUID
     created_at: datetime
     updated_at: datetime
 
@@ -19,6 +20,13 @@ class FindBase(BaseModel):
     ordering: Optional[str]
     page: Optional[int]
     page_size: Optional[Union[int, str]]
+    pages: Optional[int]
+
+
+class FindQueryOptions(BaseModel):
+    page: Optional[int] = Field(default=None)
+    ordering: Optional[str] = Field(default=None)
+    page_size: Optional[Union[int, str]] = Field(default=None)
 
 
 class SearchOptions(FindBase):

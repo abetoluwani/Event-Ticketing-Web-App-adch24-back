@@ -6,6 +6,7 @@
 
 from contextlib import AbstractContextManager
 from typing import Callable
+from uuid import UUID
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
@@ -23,7 +24,9 @@ class BaseRepository:
 
     def read_by_options(self, schema, eager=False):
         with self.session_factory() as session:
-            schema_as_dict = schema.dict(exclude_none=True)
+            # if schema and schema.model_dump():
+            schema_as_dict = schema.dict(
+                exclude_none=True) if schema and schema.model_dump() else {}
 
             ordering = schema_as_dict.get("ordering", configs.ORDERING)
 
@@ -51,25 +54,31 @@ class BaseRepository:
 
             query = filtered_query.order_by(order_query)
 
+            total_count = filtered_query.count()
+
             if page_size == "all":
                 query = query.all()
+                pages = 1
             else:
+                page_size = int(page_size)
+                pages = 0 if total_count < 1 else (1 if page_size > total_count else int(
+                    total_count / page_size))
+
                 query = query.limit(page_size).offset(
                     (page - 1) * page_size).all()
-
-            total_count = filtered_query.count()
 
             return {
                 "founds": query,
                 "search_options": {
                     "page": page,
+                    "pages": pages,
                     "page_size": page_size,
                     "ordering": ordering,
                     "total_count": total_count,
                 },
             }
 
-    def read_by_id(self, id: int, eager=False):
+    def read_by_id(self, id: UUID, eager=False):
         with self.session_factory() as session:
             query = session.query(self.model)
 
@@ -95,11 +104,11 @@ class BaseRepository:
 
                 session.refresh(query)
             except IntegrityError as e:
-                raise DuplicatedError(detail="This entry already exists!")
+                raise DuplicatedError(detail=str(e.orig))
 
             return query
 
-    def update(self, id: int, schema):
+    def update(self, id: UUID, schema):
         with self.session_factory() as session:
             session.query(self.model).filter(self.model.id == id).update(
                 schema.dict(exclude_none=True))
@@ -108,7 +117,7 @@ class BaseRepository:
 
             return self.read_by_id(id)
 
-    def update_attr(self, id: int, column: str, value):
+    def update_attr(self, id: UUID, column: str, value):
         with self.session_factory() as session:
             session.query(self.model).filter(
                 self.model.id == id).update({column: value})
@@ -117,7 +126,7 @@ class BaseRepository:
 
             return self.read_by_id(id)
 
-    def whole_update(self, id: int, schema):
+    def whole_update(self, id: UUID, schema):
         with self.session_factory() as session:
             session.query(self.model).filter(
                 self.model.id == id).update(schema.dict())
@@ -126,7 +135,7 @@ class BaseRepository:
 
             return self.read_by_id(id)
 
-    def delete_by_id(self, id: int):
+    def delete_by_id(self, id: str):
         with self.session_factory() as session:
             query = session.query(self.model).filter(
                 self.model.id == id).first()

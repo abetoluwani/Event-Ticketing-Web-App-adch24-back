@@ -23,4 +23,4 @@ class User(BaseModel, table=True):
     is_active: bool = Field(default=True)
     is_admin: bool = Field(default=False)
 
-    events: Optional[List["Event"]] = Relationship(back_populates="user")
+    events: Optional[List["Event"]] = Relationship(back_populates="owner")

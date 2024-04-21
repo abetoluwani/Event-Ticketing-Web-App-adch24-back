@@ -107,8 +107,8 @@ class AppCreator:
             description="Event Ticketing Server"
         )
 
-        self.app.add_middleware(
-            SessionMiddleware, secret_key=configs.SECRET_KEY)
+        # self.app.add_middleware(
+        #     SessionMiddleware, secret_key=configs.SECRET_KEY)
 
         # set db and container
         self.container = Container()
