@@ -7,8 +7,10 @@
 from datetime import timedelta
 from typing import Any, List, Mapping, Optional
 
+from fastapi.encoders import jsonable_encoder
+
 from app.core.config import configs
-from app.core.exceptions import AuthError
+from app.core.exceptions import AuthError, ValidationError
 from app.core.security import create_access_token, get_password_hash, \
     verify_password
 from app.model.user import User
@@ -32,7 +34,7 @@ class AuthService(BaseService):
         user: List[User] = self.user_repository.read_by_options(find_user)[
             "founds"]
 
-        if len(user) < 1:
+        if not user or len(user) < 1:
             raise AuthError(detail="Incorrect email or password")
 
         found_user = user[0]
@@ -40,20 +42,21 @@ class AuthService(BaseService):
         if not found_user.is_active:
             raise AuthError(detail="Account is not active")
 
-        if found_user.password and\
+        if (found_user.password and sign_in_info.password) and\
                 not verify_password(sign_in_info.password, found_user.password):
             raise AuthError(detail="Incorrect email or password")
 
         delattr(found_user, "password")
 
         payload = Payload(
-            id=found_user.id,
+            id=str(found_user.id),
             email=found_user.email,
-            name=found_user.first_name + found_user.last_name,
+            name=found_user.first_name + " " + found_user.last_name,
             is_admin=found_user.is_admin,
         )
 
-        token_lifespan = timedelta(minutes=configs.ACCESS_TOKEN_EXPIRE_MINUTES)
+        token_lifespan = timedelta(
+            minutes=configs.ACCESS_TOKEN_EXPIRE_MINUTES)
 
         access_token, expiration_datetime = create_access_token(
             payload.model_dump(), token_lifespan)
@@ -68,6 +71,9 @@ class AuthService(BaseService):
 
     def sign_up(self, user_info: SignUp):
         user_token = get_rand_hash()
+
+        if len(user_info.password) < 6:
+            raise ValidationError("Password is too short!")
 
         user = User(**user_info.model_dump(exclude_none=True),
                     is_active=True, is_admin=False, user_token=user_token)
