@@ -9,7 +9,10 @@ from typing import List, Optional, Union
 from uuid import UUID
 from fastapi import Request
 from pydantic import BaseModel, Field
-from app.model.user import User
+from app.model.event import Event as EventModel
+from app.model.event import EventType
+from app.model.category import Category
+# from app.schema.category_schema import Category
 from app.schema.user_schema import User_
 from app.schema.base_schema import FindBase, FindQueryOptions, FindResult, ModelBaseInfo, SearchOptions
 from app.util.schema import AllOptional
@@ -17,15 +20,14 @@ from app.util.schema import AllOptional
 
 class BaseEvent(BaseModel):
     name: str
+    description: str
 
-    start_time: time
-    end_time: time
-    date: dt
+    categories: Optional[List[Category]] = None
+
+    date: dt = Field(default=dt.today())
 
     location: str
     image: str
-
-    # user: Optional[User_]
 
     class Config:
         orm_mode = True
@@ -35,6 +37,7 @@ class Event(ModelBaseInfo, BaseEvent, AllOptional):
     ...
     # start_time: str
     # end_time: str
+    categories: List[Category]
     owner_id: UUID
     owner: Optional[User_]
 
@@ -43,15 +46,30 @@ class Event_(ModelBaseInfo, BaseEvent, AllOptional):
     ...
     # start_time: str
     # end_time: str
+    categories: List[Category]
     owner_id: UUID
-    # owner: Optional[User_]
+    owner: Optional[User_]
 
 
 class CreateEvent(BaseEvent):
-    start_time: time
-    end_time: time
+
     ...
-    # user: Optional[User] = Field(default=None)
+    categories: List[str]
+    evt_type: EventType
+
+
+class UpdateEvent(BaseEvent):
+    ...
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+    categories: Optional[List[str]] = None
+
+    date: Optional[dt] = None
+
+    location: Optional[str] = None
+    image: Optional[str] = None
+
 
 
 class GetUserEventsQuery(BaseModel):
@@ -74,5 +92,10 @@ class FindEventQueryOptions(FindQueryOptions):
 
 
 class FindEventsResult(BaseModel):
+    founds: Optional[List[Event_]]
+    search_options: Optional[SearchOptions]
+
+
+class FindUserEventsResult(BaseModel):
     founds: Optional[List[Event_]]
     search_options: Optional[SearchOptions]

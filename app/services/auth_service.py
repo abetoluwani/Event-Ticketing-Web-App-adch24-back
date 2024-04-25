@@ -70,13 +70,11 @@ class AuthService(BaseService):
         return sign_in_result
 
     def sign_up(self, user_info: SignUp):
-        user_token = get_rand_hash()
-
         if len(user_info.password) < 6:
             raise ValidationError("Password is too short!")
 
         user = User(**user_info.model_dump(exclude_none=True),
-                    is_active=True, is_admin=False, user_token=user_token)
+                    is_active=True, is_admin=False)
 
         user.password = get_password_hash(user_info.password)
 

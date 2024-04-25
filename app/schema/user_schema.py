@@ -15,8 +15,6 @@ from app.util.schema import AllOptional
 
 class BaseUser(BaseModel):
     email: str
-    # password: Optional[str]
-    user_token: Optional[str]
 
     first_name: Optional[str]
     last_name: Optional[str]
