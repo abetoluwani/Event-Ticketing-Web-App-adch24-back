@@ -251,6 +251,4 @@ class EventRepository(BaseRepository):
 
             session.commit()
 
-            print(query)
-
             return None

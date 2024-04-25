@@ -133,8 +133,6 @@ async def delete_event(
 
     event = service.remove_by_id(event_id, str(current_user.id))
 
-    print("event", event)
-
     return {
         "message": "Event deleted successfully!"
     }
