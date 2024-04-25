@@ -238,3 +238,19 @@ class EventRepository(BaseRepository):
             session.commit()
 
             return self.get_event_by_id(event_id)
+
+    def delete_event_by_id(self, id: str, user_id: str):
+        with self.session_factory() as session:
+            query = session.query(self.model).filter(cast(self.model.id, Uuid) == cast(
+                id, Uuid), cast(self.model.owner_id, Uuid) == cast(user_id, Uuid)).first()
+
+            if not query:
+                raise NotFoundError(detail=f"not found id : {id}")
+
+            session.delete(query)
+
+            session.commit()
+
+            print(query)
+
+            return None

@@ -50,3 +50,6 @@ class EventService(BaseService):
 
     def patch(self, event_info: UpdateEvent, event_id: UUID, user_id: UUID):
         return self.event_repository.update_event(event_info, event_id, user_id)
+
+    def remove_by_id(self, id: str, user_id: str) -> None:
+        return self.event_repository.delete_event_by_id(id, user_id)

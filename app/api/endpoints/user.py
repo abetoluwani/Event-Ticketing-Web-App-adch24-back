@@ -116,7 +116,7 @@ async def delete_user(
     service: UserService = Depends(Provide[Container.user_service]),
     current_user: User = Depends(get_current_user),
 ):
-    user = service.remove_by_id(str(current_user.id))
+    service.remove_by_id(str(current_user.id))
 
     return {
         "message": "Account deleted successfully!"

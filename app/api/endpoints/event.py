@@ -121,20 +121,23 @@ async def update_event(
     return event
 
 
-# @router.delete("/{event_id}", summary="Delete an event",
-#               dependencies=[Depends(JWTBearer())],
-#               response_model=Event
-#               )
-# @inject
-# async def delete_event(
-#     event_id: str,
-#     event_info: UpdateEvent,
-#     service: EventService = Depends(Provide[Container.event_service]),
-#     current_user: User = Depends(get_current_user)
-# ):
-#     event = service.patch(event_info, UUID(event_id), current_user.id)
+@router.delete("/{event_id}", summary="Delete an event",
+               dependencies=[Depends(JWTBearer())],
+               )
+@inject
+async def delete_event(
+    event_id: str,
+    service: EventService = Depends(Provide[Container.event_service]),
+    current_user: User = Depends(get_current_user)
+):
 
-#     return event
+    event = service.remove_by_id(event_id, str(current_user.id))
+
+    print("event", event)
+
+    return {
+        "message": "Event deleted successfully!"
+    }
 
 
 @router.get("/{owner_id}/all", summary="Get all events of a user",
@@ -159,6 +162,5 @@ async def get_user_events(
 
         event = Event_(**event.model_dump(),
                        categories=category_list, owner=owner)
-
 
     return events

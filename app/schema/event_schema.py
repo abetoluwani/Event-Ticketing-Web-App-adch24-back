@@ -18,7 +18,7 @@ from app.schema.base_schema import FindBase, FindQueryOptions, FindResult, Model
 from app.util.schema import AllOptional
 
 
-class BaseEvent(BaseModel):
+class BaseEvent(ModelBaseInfo):
     name: str
     description: str
 
@@ -33,7 +33,7 @@ class BaseEvent(BaseModel):
         orm_mode = True
 
 
-class Event(ModelBaseInfo, BaseEvent, AllOptional):
+class Event(BaseEvent, AllOptional):
     ...
     # start_time: str
     # end_time: str
@@ -42,7 +42,7 @@ class Event(ModelBaseInfo, BaseEvent, AllOptional):
     owner: Optional[User_]
 
 
-class Event_(ModelBaseInfo, BaseEvent, AllOptional):
+class Event_(BaseEvent, AllOptional):
     ...
     # start_time: str
     # end_time: str
@@ -69,6 +69,10 @@ class UpdateEvent(BaseEvent):
 
     location: Optional[str] = None
     image: Optional[str] = None
+
+
+class DeleteEvent(ModelBaseInfo):
+    ...
 
 
 
