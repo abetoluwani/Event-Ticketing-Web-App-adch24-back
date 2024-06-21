@@ -4,33 +4,84 @@
 """Event Model"""
 
 
-from app.util.date import format_time_with_am_pm
-from datetime import date as dt, datetime, time
-from typing import Optional
+import enum
 from uuid import UUID
-from sqlalchemy import Column, Date, DateTime, TIME
-from sqlmodel import Field, Relationship, ForeignKey
+
+from sqlmodel import Field, Relationship, SQLModel, Table
+from app.core.database import Base
+from app.schema.user_schema import User
+from app.util.date import format_time_with_am_pm
+from typing import Dict, List, Optional, Tuple
+from sqlalchemy import ARRAY, JSON, Column, Date, DateTime, ForeignKey, String, Uuid, func, \
+    Enum
 from app.model.base_model import BaseModel
-from .user import User
+from sqlalchemy.orm import relationship
+from datetime import date as dt, datetime, time
+from app.model.category import Category
 
 
-class Event(BaseModel,  table=True):
+class EventType(str, enum.Enum):
+    """Event Type"""
+    public = "public"
+    private = "private"
+
+
+EventTypeEnum: Enum = Enum(
+    EventType,
+    name="event_type_enum",
+    create_constraint=True,
+    metadata=Base.metadata,
+    validate_strings=True,
+)
+
+
+class EventCategory(BaseModel, table=True):
+    ___tablename__ = "event_categories"
+
+    event_id: UUID = Field(sa_column=Column(
+        Uuid, ForeignKey("events.id"), primary_key=True))
+
+    category_id: UUID = Field(sa_column=Column(
+        Uuid, ForeignKey("categories.id"), primary_key=True))
+
+
+event_categories = Table(
+    "event_categories",
+    SQLModel.metadata,
+    Column("event_id", Uuid, ForeignKey("events.id"), primary_key=True),
+    Column("category_id", Uuid, ForeignKey(
+        "categories.id"), primary_key=True)
+)
+
+
+class Event(BaseModel, table=True):
     __tablename__: str = 'events'
 
-    name: str = Field(default=None, nullable=False)
+    name: str = Field(sa_column=Column(
+        String(255), default=None, nullable=False))
 
-    start_time: time = Field(sa_column=Column(TIME))
+    categories_id: Optional[List[UUID]] = Field(
+        sa_column=Column(Uuid, ForeignKey('categories.id')))
 
-    end_time: time = Field(sa_column=Column(TIME))
+    categories: List['Category'] = Relationship(
+        back_populates="events", sa_relationship_kwargs={"secondary": 'event_categories'})
 
-    date: dt = Field(sa_column=Column(Date))
+    description: str = Field(
+        sa_column=Column(String(2048), default=None, nullable=False))
 
-    location: str = Field(default=None, nullable=True)
+    date: dt = Field(sa_column=Column(
+        Date, default=dt.today(), nullable=False))
 
-    image: str = Field(default=None, nullable=True)
+    location: str = Field(sa_column=Column(
+        String(255), default=None, nullable=False))
+
+    image: str = Field(sa_column=Column(
+        String(2048), default=None, nullable=False))
+
+    evt_type: EventType = Field(default=EventType.public, nullable=False)
 
     owner_id: Optional[UUID] = Field(
-        default=None, nullable=False, foreign_key="users.id")
+        sa_column=Column(Uuid, ForeignKey('users.id')))
 
     owner: Optional['User'] = Relationship(back_populates="events")
 

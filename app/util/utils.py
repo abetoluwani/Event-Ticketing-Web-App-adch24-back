@@ -4,6 +4,7 @@
 """Utils module"""
 
 
+from collections import namedtuple
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -25,3 +26,7 @@ def get_remaining_minutes(user_info: Any) -> float:
     remaining_minutes = time_delta.total_seconds() / 60
 
     return remaining_minutes
+
+
+def create_named_tuple(*values):
+    return namedtuple('NamedTuple', values)(*values)

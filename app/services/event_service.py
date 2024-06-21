@@ -6,12 +6,14 @@
 
 from typing import Any, Dict
 from uuid import UUID
+from app.model.category import Category
 from app.model.user import User
 from app.model.event import Event
+# from app.schema.event_schema import Event
 from app.repository.event_repository import EventRepository
 from app.schema.user_schema import UpsertUser, User_, User as u
 from app.services.base_service import BaseService
-from app.schema.event_schema import CreateEvent, Event as ev
+from app.schema.event_schema import CreateEvent, Event as ev, UpdateEvent
 from app.util.date import format_time_with_am_pm
 
 
@@ -23,9 +25,14 @@ class EventService(BaseService):
 
     def create_event(self, event_info: CreateEvent, user: User) -> Event:
         """Creates a new event"""
-        schema = Event(**event_info.model_dump(), owner_id=user.id)
+        categories = []
 
-        event = self.event_repository.create(schema)
+        for category in event_info.categories:
+            categories.append(Category(name=category))
+
+        event_info.categories = categories
+
+        event = self.event_repository.create(event_info, user.id)
 
         return event
 
@@ -34,4 +41,15 @@ class EventService(BaseService):
 
     def get_events_by_user(self, schema, owner_id: UUID):
         """"""
-        return self.event_repository.get_events_by_user(schema, owner_id)
+        events = self.event_repository.get_events_by_user(schema, owner_id)
+
+        return events
+
+    def get_by_id(self, id: str):
+        return self.event_repository.get_event_by_id(UUID(id))
+
+    def patch(self, event_info: UpdateEvent, event_id: UUID, user_id: UUID):
+        return self.event_repository.update_event(event_info, event_id, user_id)
+
+    def remove_by_id(self, id: str, user_id: str) -> None:
+        return self.event_repository.delete_event_by_id(id, user_id)

@@ -8,9 +8,11 @@ from dependency_injector import containers, providers
 from app.core.config import configs
 from app.core.database import Database
 from app.repository import *
+from app.repository.category_repository import CategoryRepository
 from app.repository.event_repository import EventRepository
 from app.services import *
 from app.services.auth_service import AuthService
+from app.services.category_service import CategoryService
 from app.services.event_service import EventService
 
 
@@ -38,6 +40,9 @@ class Container(containers.DeclarativeContainer):
     # async_user_repository = providers.Factory(
     #     UserRepository, session_factory=async_db.provided.session)
 
+    category_repository = providers.Factory(CategoryRepository,
+                                            session_factory=db.provided.session)
+
     event_repository = providers.Factory(EventRepository,
                                          session_factory=db.provided.session)
 
@@ -47,8 +52,8 @@ class Container(containers.DeclarativeContainer):
     user_service = providers.Factory(
         UserService, user_repository=user_repository)
 
-    # async_user_service = providers.Factory(
-    #     UserService, user_repository=async_user_repository)
+    category_service = providers.Factory(CategoryService,
+                                         category_repository=category_repository)
 
     event_service = providers.Factory(
         EventService, event_repository=event_repository)

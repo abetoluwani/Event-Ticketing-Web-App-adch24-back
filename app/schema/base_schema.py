@@ -16,6 +16,7 @@ class ModelBaseInfo(BaseModel):
     updated_at: datetime
 
 
+
 class FindBase(BaseModel):
     ordering: Optional[str]
     page: Optional[int]
